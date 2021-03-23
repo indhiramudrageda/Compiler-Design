@@ -1,0 +1,41 @@
+class A { 
+    final int a = 10;
+    float b[5];
+
+    - void c(int p, float q){};
+    - char c(){ 
+        int a;
+        a = 10 + 20;
+        cc = 10 + 20*33;
+        aa = madsad();
+        as = -1;
+        as = ~k;
+        ass = (hjk ? true : false);
+        hj = (int) k;
+        aa = madsad(jkdhfjk, fdjf, 10, "asdkl", true);
+        v = b[10];
+        k = 16;
+        read (a, b);
+        if(true) {
+            ekj = 19;
+        } else {
+            hdsh = 22;
+        }
+        read(v);
+        print(a);
+        print(as, jj);
+        printline(l, 54, 67, r);
+        abc();
+        abcd(a);
+        abhd(a, b, c);
+        anh(10, 20);
+        return 10;
+        return e;
+        asd++;
+        ass--;
+        {
+            inc++;
+            a = 10;
+        };
+    };
+}

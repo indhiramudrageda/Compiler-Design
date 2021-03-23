@@ -1,0 +1,394 @@
+
+import java_cup.runtime.*;
+
+terminal CLASS; //2
+terminal FINAL; //3
+
+terminal READ; //4
+terminal PRINT; //5
+terminal PRINTLINE; //6
+terminal RETURN;//7
+
+terminal IF; //8
+terminal ELSE; //9
+terminal WHILE; //10
+
+terminal OPEN_SQUARE; //11
+terminal CLOSED_SQUARE;//12
+terminal OPEN_BRACKET;//13
+terminal CLOSED_BRACKET;//14
+terminal OPEN_FLOWER;//15
+terminal CLOSED_FLOWER; //16
+
+terminal VOID; //17
+terminal INT;//18
+terminal CHAR;//19
+terminal BOOL;//20
+terminal FLOAT; //21
+
+terminal QUESTION; //22
+terminal COLON; //23
+terminal PLUS;//24
+terminal MINUS;//25
+terminal MULT;//26
+terminal DIVIDE;//27
+terminal INCREMENT;//28
+terminal DECREMENT;//29
+terminal LT;//30
+terminal LTE;//31
+terminal GT;//32
+terminal GTE;//33
+terminal EQUALITY;//34
+terminal NOTEQUAL;//35
+terminal NOT;//36
+terminal OR;//37
+terminal AND;//38
+terminal ASSIGN;//39
+terminal COMMA;//40
+terminal SEMI;//41
+
+terminal TRUE; //42
+terminal FALSE; //43
+
+terminal String ID; //44
+terminal int INTLIT; //45
+terminal char CHARLIT; //46
+terminal String STRLIT; //47
+terminal float FLOATLIT; //48
+
+terminal INLINE_COMMENT; //49
+terminal BLOCK_COMMENT; //50
+
+non terminal Program program;
+non terminal MemberDecls memberdecls;
+non terminal FieldDecls fielddecls;
+non terminal MethodDecls methoddecls;
+non terminal FieldDecl fielddecl;
+non terminal OptionalFinal optionalfinal;
+non terminal Type type;
+non terminal OptionalExpr optionalexpr;
+non terminal Expr expr;
+non terminal BinaryOp binaryOp;
+non terminal MethodDecl methoddecl;
+non terminal ReturnType returntype;
+non terminal OptionalSemi optionalsemi;
+non terminal ArgDecls argdecls;
+non terminal ArgDeclList argdecllist;
+non terminal ArgDecl argdecl;
+non terminal Stmts stmts;
+non terminal Stmt stmt;
+non terminal IfStmt ifstmt;
+non terminal IfEnd ifend;
+non terminal WhileStmt whilestmt;
+non terminal Asn asn;
+non terminal Name name;
+non terminal Read read;
+non terminal ReadList readlist;
+non terminal Print print;
+non terminal PrintList printlist;
+non terminal PrintLine printline;
+non terminal PrintLineList printlinelist;
+non terminal MethodCall methodcall;
+non terminal Args args;
+non terminal Return return;
+non terminal ReturnVal returnval;
+non terminal Increment increment;
+non terminal Decrement decrement;
+non terminal Block block;
+
+precedence left PLUS, MINUS;
+precedence left MULT, DIVIDE;
+
+
+program ::= CLASS ID:i OPEN_FLOWER memberdecls:mds CLOSED_FLOWER
+        {: RESULT = new Program(i, mds);:}
+        ;
+
+memberdecls ::= fielddecls:fds methoddecls:mds
+        {: RESULT = new MemberDecls(fds, mds);:}
+        ;
+
+fielddecls ::= fielddecl:fd fielddecls:fds 
+          {: RESULT = new FieldDecls(fd, fds);:}
+          |
+          {: RESULT = new FieldDecls();:}
+          ;
+
+fielddecl ::= type:t ID:i OPEN_SQUARE INTLIT:intlt CLOSED_SQUARE SEMI
+          {: RESULT = new FieldDecl(t, i, intlt);:}
+          |
+          optionalfinal:optf type:t ID:i optionalexpr:opte SEMI
+          {: RESULT = new FieldDecl(optf, t, i, opte);:}
+          |
+          type:t ID:i optionalexpr:opte SEMI
+          {: RESULT = new FieldDecl(t, i, opte);:}
+          ;
+
+optionalfinal ::= FINAL
+          {: RESULT = new OptionalFinal("final");:}
+          ;
+
+optionalexpr ::= ASSIGN expr:e
+          {: RESULT = new OptionalExpr(e);:}
+          |
+          {: RESULT = new OptionalExpr();:}
+          ;
+
+expr ::= name:n
+     {: RESULT = new Expr(n); :}
+     |
+     ID:i OPEN_BRACKET args:a CLOSED_BRACKET
+     {: RESULT = new Expr(i, a); :}
+     |
+     INTLIT:i
+     {: RESULT = new Expr(i); :}
+     |
+     CHARLIT:c
+     {: RESULT = new Expr(c); :}
+     |
+     STRLIT:s
+     {: RESULT = new Expr(s); :}
+     |
+     FLOATLIT:f
+     {: RESULT = new Expr(f); :}
+     |
+     TRUE
+     {: RESULT = new Expr(true); :}
+     |
+     FALSE
+     {: RESULT = new Expr(false); :}
+     |
+     OPEN_BRACKET expr:e CLOSED_BRACKET
+     {: RESULT = new Expr(e, 7); :}
+     |
+     NOT expr:e
+     {: RESULT = new Expr(e, 8); :}
+     |
+     MINUS expr:e
+     {: RESULT = new Expr(e, 9); :}
+     |
+     PLUS expr:e
+     {: RESULT = new Expr(e, 10); :}
+     |
+     OPEN_BRACKET type:t CLOSED_BRACKET expr:e
+     {: RESULT = new Expr(e, t, 11); :}
+     |
+     binaryOp:b
+     {: RESULT = new Expr(b); :}
+     |
+     OPEN_BRACKET expr:e1 QUESTION expr:e2 COLON expr:e3 CLOSED_BRACKET
+     {: RESULT = new Expr(e1, e2, e3, 13); :}
+     ;
+
+binaryOp ::=
+         expr:lhs PLUS  expr:rhs
+         {: RESULT = new BinaryOp(lhs, "+", rhs); :}
+         |
+         expr:lhs MINUS  expr:rhs
+         {: RESULT = new BinaryOp(lhs, "-", rhs); :}
+         |
+         expr:lhs MULT  expr:rhs
+         {: RESULT = new BinaryOp(lhs, "*", rhs); :}
+         |
+         expr:lhs DIVIDE  expr:rhs
+         {: RESULT = new BinaryOp(lhs, "/", rhs); :}
+         ;
+
+type ::= INT 
+     {: RESULT = new Type("int");:}
+     |
+     CHAR 
+     {: RESULT = new Type("char");:}
+     |
+     BOOL 
+     {: RESULT = new Type("bool");:}
+     |
+     FLOAT
+     {: RESULT = new Type("float");:}
+     ;
+
+methoddecls ::= methoddecl:md methoddecls:mds 
+          {: RESULT = new MethodDecls(md, mds);:}
+          |
+          {: RESULT = new MethodDecls();:}
+          ;
+
+methoddecl ::= returntype:t ID:i OPEN_BRACKET argdecls:ads CLOSED_BRACKET OPEN_FLOWER fielddecls:fds stmts:ss CLOSED_FLOWER optionalsemi:optsemi
+           {: RESULT = new MethodDecl(t, i, ads, fds, ss, optsemi);:}
+           ;
+
+returntype ::= INT 
+          {: RESULT = new ReturnType("int");:}
+          |
+          CHAR 
+          {: RESULT = new ReturnType("char");:}
+          |
+          BOOL 
+          {: RESULT = new ReturnType("bool");:}
+          |
+          FLOAT
+          {: RESULT = new ReturnType("float");:}
+          |
+          VOID 
+          {: RESULT = new ReturnType("void");:}
+          ;
+
+argdecls ::= argdecllist:adlist 
+          {: RESULT = new ArgDecls(adlist);:}
+          | 
+          {: RESULT = new ArgDecls();:}
+          ;
+
+argdecllist ::= argdecl:ad COMMA argdecllist:adlist
+          {: RESULT = new ArgDeclList(ad, adlist);:}
+          | 
+          argdecl:ad
+          {: RESULT = new ArgDeclList(ad);:}
+          ;
+
+argdecl ::= type:t ID:i
+          {: RESULT = new ArgDecl(t, i, false);:}
+          | 
+          type:t ID:i OPEN_SQUARE CLOSED_SQUARE
+          {: RESULT = new ArgDecl(t, i, true);:}
+          ;
+
+stmts ::= stmt:s stmts:ss 
+          {: RESULT = new Stmts(s, ss);:}
+          | 
+          {: RESULT = new Stmts();:}
+          ;
+
+stmt ::= 
+     ifstmt:i
+     {: RESULT = i; :}
+     |
+     whilestmt:w
+     {: RESULT = w; :}
+     |
+     asn:a
+     {: RESULT = a; :}
+     |
+     read:r
+     {: RESULT = r; :}
+     |
+     print:p
+     {: RESULT = p; :}
+     |
+     printline:pl
+     {: RESULT = pl; :}
+     |
+     methodcall:mc
+     {: RESULT = mc; :}
+     |
+     return:rt
+     {: RESULT = rt; :}
+     |
+     increment:inc
+     {: RESULT = inc; :}
+     |
+     decrement:dec
+     {: RESULT = dec; :}
+     |
+     block:bk
+     {: RESULT = bk; :}
+     ;
+
+ifstmt ::= IF OPEN_BRACKET expr:e CLOSED_BRACKET stmt:s ifend:ie
+       {: RESULT = new IfStmt(e, s, ie);:}
+       ;
+
+ifend ::= ELSE stmt:s
+          {: RESULT = new IfEnd(s);:}
+          ;
+
+whilestmt ::= WHILE OPEN_BRACKET expr:e CLOSED_BRACKET stmt:s
+     {: RESULT = new WhileStmt(e, s);:}
+     ;
+
+asn ::=
+    name:n ASSIGN expr:e SEMI
+    {: RESULT = new Asn(n,e); :}
+    ;
+
+read ::=
+        READ OPEN_BRACKET readlist:rl CLOSED_BRACKET SEMI
+        {: RESULT = new Read(rl); :}
+        ; 
+
+readlist ::= name:n COMMA readlist:rl
+     {: RESULT = new ReadList(n, rl); :}
+     | 
+     name:n
+     {: RESULT = new ReadList(n); :}
+     ;
+
+print ::=
+     PRINT OPEN_BRACKET printlist:pl CLOSED_BRACKET SEMI
+     {: RESULT = new Print(pl); :}
+     ; 
+
+printlist ::= expr:e COMMA printlist:pl
+     {: RESULT = new PrintList(e, pl); :}
+     | 
+     expr:e
+     {: RESULT = new PrintList(e); :}
+     ;
+
+printline ::=
+     PRINTLINE OPEN_BRACKET printlinelist:pl CLOSED_BRACKET SEMI
+     {: RESULT = new PrintLine(pl); :}
+     ; 
+
+printlinelist ::= printlist:pl
+     {: RESULT = new PrintLineList(pl); :}
+     | 
+     {: RESULT = new PrintLineList(); :}
+     ;
+
+methodcall ::= ID:i OPEN_BRACKET args:a CLOSED_BRACKET SEMI
+          {: RESULT = new MethodCall(i, a); :}
+          ;
+
+args ::= expr:e COMMA args:a
+     {: RESULT = new Args(e, a); :}
+     | expr:e
+     {: RESULT = new Args(e); :}
+     |
+     {: RESULT = new Args(); :}
+     ;
+
+return ::= RETURN returnval:rv SEMI
+     {: RESULT = new Return(rv); :}
+     ;
+
+returnval ::= expr:e
+          {: RESULT = new ReturnVal(e); :}
+          |
+          {: RESULT = new ReturnVal(); :}
+          ;
+
+increment ::= name:n INCREMENT SEMI
+          {: RESULT = new Increment(n); :}
+          ;
+
+decrement ::= name:n DECREMENT SEMI
+          {: RESULT = new Decrement(n); :}
+          ;
+
+block ::= OPEN_FLOWER fielddecls:fs stmts:ss CLOSED_FLOWER optionalsemi:opts
+          {: RESULT = new Block(fs, ss, opts); :}
+          ;
+
+name ::= ID:i
+     {: RESULT = new Name(i); :}
+     |
+     ID:i OPEN_SQUARE expr:e CLOSED_SQUARE
+     {: RESULT = new Name(i,e); :}
+     ;
+
+optionalsemi ::= SEMI
+          {: RESULT = new OptionalSemi(";");:}
+          |
+          {: RESULT = new OptionalSemi("");:}
+          ;
